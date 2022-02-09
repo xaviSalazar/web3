@@ -26,7 +26,7 @@ export const TransactionProvider = ({ children }) => {
     const [currentAccount, setCurrentAccount]= useState('');
     const [formData, setFormData] = useState({ addressTo: '', amount: '', keyword: '', message: ''});
     const [isLoading, setIsLoading] = useState (false);
-    const [transactionCount, setTransactionCount] = useState(localStorage.getItem('transactionCount'));
+    const [transactionCount, setTransactionCount] = useState(localStorage.getItem('transactionCount')); // store in local storage
 
     const handleChange = (e,name) => {
         setFormData((prevState)=>({...prevState, [name]: e.target.value}))
@@ -82,15 +82,15 @@ export const TransactionProvider = ({ children }) => {
 
             const { addressTo, amount, keyword, message } = formData;
             const transactionContract = getEthereumContract();
-            const parsedAmount = ethers.utils.parseEther(amount);
+            const parsedAmount = ethers.utils.parseEther(amount); // to convert to decimal 
 
             await ethereum.request({
                 method: 'eth_sendTransaction',
                 params: [{
                     from: currentAccount,
                     to: addressTo,
-                    gas: '0x5208',
-                    value: parsedAmount._hex,
+                    gas: '0x5208', // 21000 GWEI
+                    value: parsedAmount._hex,  // 0.00001
                 }]
             })
 
@@ -98,13 +98,14 @@ export const TransactionProvider = ({ children }) => {
 
         setIsLoading(true);
         console.log(`Loading - ${transactionHash.hash}`);
-        await transactionHash.wait();
+        await transactionHash.wait(); // wait for the transaction to be finished
 
         setIsLoading(false);
         console.log(`Success - ${transactionHash.hash}`);
 
         const transactionCount = await transactionContract.getTransactionCount();
         setTransactionCount(transactionCount.toNumber());
+
         } catch(error) {
             console.log(error);
             throw new Error("No ethereum object")
@@ -122,6 +123,5 @@ export const TransactionProvider = ({ children }) => {
             { children }
 
         </TransactionContext.Provider>
-
     )
 }
